@@ -20,7 +20,7 @@
             width: 90%;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
+            justify-content: space-around;
         }
 
         #image-container img {
@@ -30,11 +30,8 @@
             transform: scale(0.8);
             transition: opacity 0.5s ease, transform 0.5s ease;
             border: 10px solid white;
-            /* 相框边框 */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            /* 阴影效果 */
             border-radius: 10px;
-            /* 圆角效果 */
         }
 
         #image-container img.show {
@@ -73,6 +70,7 @@
                 const img = document.createElement('img');
                 img.src = `./hd/${i}.jpg`;
                 img.alt = `Image ${i}`;
+                img.loading = 'lazy'; // 懒加载属性
                 container.appendChild(img);
 
                 // 添加动画效果
