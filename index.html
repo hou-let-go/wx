@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浪漫七夕</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: static;
+        }
+
+        .container {
+            margin-top: -40px;
+            text-align: center;
+            color: white;
+        }
+
+        @keyframes colorChange {
+            0% {
+                color: #ff00a6;
+            }
+
+            33% {
+                color: #00d9ff;
+            }
+
+            66% {
+                color: #ff006a;
+            }
+
+            100% {
+                color: #ccff00;
+            }
+        }
+
+        h1 span,
+        h2 span,
+        h3 span,
+        p span {
+            transition: color 2s ease;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .heart {
+            font-size: 100px;
+            color: #ff4d4d;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes move {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-100vh);
+            }
+        }
+
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff3333;
+        }
+
+        #message {
+            font-size: 1.2rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            /* 确保文本不会超出容器 */
+        }
+
+        /* 烟花效果 */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        #lyrics {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="background-music"
+        src="https://lx-sycdn.kuwo.cn/e15e77c81495bff724463da7300b3ac5/66b7696a/resource/n2/69/77/148282732.mp3"
+        loop></audio>
+    <div id="particles-js"></div>
+    <div id="lyrics">歌词显示区</div>
+    <div class="container">
+        <h1>亲爱的body</h1>
+        <h2>小迪</h2>
+        <h3>七夕快乐</h3>
+        <div class="heart" id="heart">❤</div>
+        <p id="message">点击下方按钮获取七夕祝福</p>
+        <button id="xiaodi">获取祝福</button>
+        <button id="toggle-music">播放/暂停</button>
+        <div id="music-time">00:00 / 00:00</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="module">
+        import loveMessages from "./lv.js";
+
+        // 音乐播放控制
+        const music = document.getElementById('background-music');
+        const toggleMusicButton = document.getElementById('toggle-music');
+        const musicTime = document.getElementById('music-time');
+        const lyricsElement = document.getElementById('lyrics');
+
+        toggleMusicButton.addEventListener('click', () => {
+            if (music.paused) {
+                music.play();
+                toggleMusicButton.textContent = '暂停音乐';
+            } else {
+                music.pause();
+                toggleMusicButton.textContent = '播放音乐';
+            }
+        });
+
+        // 更新音乐时间显示
+        function updateMusicTime() {
+            const currentTime = formatTime(music.currentTime);
+            const duration = formatTime(music.duration);
+            musicTime.textContent = `${currentTime} / ${duration}`;
+        }
+
+        // 格式化时间为 mm:ss
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 歌词数组
+        const lyrics = [
+            { time: 0, text: "我们结婚吧" },
+            { time: 10, text: "从今以后你就是我的唯一" },
+            { time: 20, text: "我会永远爱你" },
+            { time: 30, text: "无论贫穷还是富有" },
+            { time: 40, text: "无论健康还是疾病" },
+            { time: 50, text: "我都会陪在你身边" },
+            // ... 添加更多歌词 ...
+        ];
+        // 更新歌词显示
+        function updateLyrics() {
+            const currentTime = music.currentTime;
+            for (let i = lyrics.length - 1; i >= 0; i--) {
+                if (currentTime >= lyrics[i].time) {
+                    lyricsElement.textContent = lyrics[i].text;
+                    break;
+                }
+            }
+        }
+
+        // 每秒更新一次音乐时间和歌词
+        setInterval(() => {
+            updateMusicTime();
+            updateLyrics();
+        }, 500);
+
+        //  图片页面
+        document.getElementById("heart").addEventListener('click', function () {
+            window.location.href = "./picture.html"
+        })
+        // 七夕情话数组
+        console.log(loveMessages.length);
+        // color
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        }
+        function updateTitleColors() {
+            const h1 = document.querySelector('h1');
+            const h2 = document.querySelector('h2');
+            const h3 = document.querySelector('h3');
+            const p = document.getElementById('message');
+
+            let color1, color2, color3, color4;
+            do {
+                color1 = getRandomColor();
+                color2 = getRandomColor();
+                color3 = getRandomColor();
+                color4 = getRandomColor();
+            } while (
+                color1 === color2 ||
+                color1 === color3 ||
+                color1 === color4 ||
+                color2 === color3 ||
+                color2 === color4 ||
+                color3 === color4
+            );
+
+            h1.style.color = color1;
+            h2.style.color = color2;
+            h3.style.color = color3;
+            p.style.color = color4;
+        }
+
+        function wrapTextInSpans(element) {
+            const text = element.textContent;
+            element.innerHTML = '';
+            for (let char of text) {
+                const span = document.createElement('span');
+                span.textContent = char;
+                element.appendChild(span);
+            }
+        }
+        function updateColors() {
+            const elements = [
+                document.querySelector('h1'),
+                document.querySelector('h2'),
+                document.querySelector('h3'),
+                document.getElementById('message')
+            ];
+
+            elements.forEach(element => {
+                if (!element.querySelector('span')) {
+                    wrapTextInSpans(element);
+                }
+                element.querySelectorAll('span').forEach(span => {
+                    span.style.color = getRandomColor();
+                });
+            });
+        }
+        // 初始更新颜色
+        updateTitleColors();
+
+        // 每5秒更新一次颜色
+        setInterval(updateTitleColors, 1000);
+        // 每1秒更新一次颜色
+        setInterval(updateColors, 1000);
+        // 创建星星背景
+        for (let i = 0; i < 100; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animationDuration = Math.random() * 3 + 2 + 's';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(star);
+        }
+        function createStar() {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = '100vh';
+            star.style.animationDuration = Math.random() * 3 + 2 + 's';
+            star.style.animationDelay = Math.random() * 2 + 's';
+
+            // 添加移动动画
+            let moveDuration = Math.random() * 15 + 20 + 's'; // 20-35秒的随机持续时间
+            star.style.animation = `twinkle 2s infinite ease-in-out, move ${moveDuration} linear`;
+
+            document.body.appendChild(star);
+
+            // 当星星移出视图时移除它
+            setTimeout(() => {
+                star.remove();
+            }, parseFloat(moveDuration) * 1000);
+        }
+
+        // 初始创建一些星星
+        for (let i = 0; i < 50; i++) {
+            createStar();
+        }
+
+        // 每隔一段时间创建新的星星
+        setInterval(createStar, 1000);
+
+        // 初始化 particles.js
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 100,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": ["#ff0000", "#ff8000", "#ffff00", "#80ff00", "#00ff80", "#00ffff", "#0080ff", "#8000ff", "#ff00ff"]
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 1,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 3,
+                        "size_min": 0.3,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": false
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 3,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 600
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": false
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 400,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        document.getElementById('xiaodi').addEventListener('click', function () {
+            console.log('Button clicked');
+            const messageElement = document.getElementById('message');
+            const randomIndex = Math.floor(Math.random() * loveMessages.length);
+            messageElement.textContent = loveMessages[randomIndex];
+            wrapTextInSpans(messageElement);
+            messageElement.querySelectorAll('span').forEach(span => {
+                span.style.color = getRandomColor();
+            });
+            messageElement.style.animation = 'pulse 0.5s';
+            setTimeout(() => {
+                messageElement.style.animation = '';
+            }, 500);
+        });
+
+    </script>
+</body>
+
+</html>
