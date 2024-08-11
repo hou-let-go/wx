@@ -24,7 +24,7 @@
         }
 
         #image-container picture {
-            width: 48%;
+            width: 40%;
             margin-bottom: 5px;
             opacity: 0;
             transform: scale(0.8);
@@ -49,10 +49,20 @@
             font-size: 1em;
             cursor: pointer;
         }
+
+        img {
+            width: 100%;
+            height: 200px;
+        }
+
+        h2 {
+            color: skyblue;
+        }
     </style>
 </head>
 
 <body>
+    <h2>小迪,日常</h2>
     <div id="image-container"></div>
     <div class="pagination" id="pagination"></div>
 
@@ -69,14 +79,18 @@
             for (let i = start + 1; i <= end && i <= 144; i++) {
                 const picture = document.createElement('picture');
                 const source1 = document.createElement('source');
-                source1.srcset = `./hd/${i}-small.jpg`;
+                // source1.srcset = `./hd/${i}-small.jpg`;
                 source1.media = "(max-width: 600px)";
                 const source2 = document.createElement('source');
-                source2.srcset = `./hd/${i}-medium.jpg`;
+                // source2.srcset = `./hd/${i}-medium.jpg`;
                 source2.media = "(max-width: 1200px)";
                 const img = document.createElement('img');
-                img.src = `./hd/${i}.jpg`;
+                img.dataset.src = `./hd/${i}.jpg`;
                 img.alt = `Image ${i}`;
+                img.classList.add('lazy');
+                img.onerror = function () {
+                    console.error(`Image ${i} failed to load.`);
+                };
                 picture.appendChild(source1);
                 picture.appendChild(source2);
                 picture.appendChild(img);
@@ -87,6 +101,28 @@
                     picture.classList.add('show');
                 }, 100 * (i - start));
             }
+
+            // 懒加载
+            const lazyImages = document.querySelectorAll('.lazy');
+            const lazyLoad = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        observer.unobserve(img);
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(lazyLoad, {
+                rootMargin: '0px 0px 200px 0px',
+                threshold: 0.1
+            });
+
+            lazyImages.forEach(img => {
+                observer.observe(img);
+            });
         }
 
         function renderPagination() {
